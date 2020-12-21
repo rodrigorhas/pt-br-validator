@@ -2,10 +2,27 @@
 
 namespace LaravelLegends\PtBrValidator;
 
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\ServiceProvider;
 
 class ValidatorProvider extends ServiceProvider
 {
+
+    public static $rules = [
+        'celular' => \LaravelLegends\PtBrValidator\Rules\Celular::class,
+        'celular_com_ddd' => \LaravelLegends\PtBrValidator\Rules\CelularComDdd::class,
+        'celular_com_codigo' => \LaravelLegends\PtBrValidator\Rules\CelularComCodigo ::class,
+        'cnh' => \LaravelLegends\PtBrValidator\Rules\Cnh::class,
+        'cnpj' => \LaravelLegends\PtBrValidator\Rules\Cnpj::class,
+        'cpf' => \LaravelLegends\PtBrValidator\Rules\Cpf::class,
+        'formato_cnpj' => \LaravelLegends\PtBrValidator\Rules\FormatoCnpj::class,
+        'formato_cpf' => \LaravelLegends\PtBrValidator\Rules\FormatoCpf::class,
+        'telefone' => \LaravelLegends\PtBrValidator\Rules\Telefone::class,
+        'telefone_com_ddd' => \LaravelLegends\PtBrValidator\Rules\TelefoneComDdd::class,
+        'telefone_com_codigo' => \LaravelLegends\PtBrValidator\Rules\TelefoneComCodigo::class,
+        'formato_cep' => \LaravelLegends\PtBrValidator\Rules\FormatoCep::class,
+        'formato_placa_de_veiculo' => \LaravelLegends\PtBrValidator\Rules\FormatoPlacaDeVeiculo::class,
+    ];
 
     /**
      * Indicates if loading of the provider is deferred.
@@ -20,40 +37,31 @@ class ValidatorProvider extends ServiceProvider
      *
      * @return void
      */
-
     public function boot()
     {
+        $this->registerRules(self::$rules);
+    }
 
-        $rules = [
-            'celular'                  => \LaravelLegends\PtBrValidator\Rules\Celular::class,
-            'celular_com_ddd'          => \LaravelLegends\PtBrValidator\Rules\CelularComDdd::class,
-            'celular_com_codigo'       => \LaravelLegends\PtBrValidator\Rules\CelularComCodigo::class,
-            'cnh'                      => \LaravelLegends\PtBrValidator\Rules\Cnh::class,
-            'cnpj'                     => \LaravelLegends\PtBrValidator\Rules\Cnpj::class,
-            'cpf'                      => \LaravelLegends\PtBrValidator\Rules\Cpf::class,
-            'formato_cnpj'             => \LaravelLegends\PtBrValidator\Rules\FormatoCnpj::class,
-            'formato_cpf'              => \LaravelLegends\PtBrValidator\Rules\FormatoCpf::class,
-            'telefone'                 => \LaravelLegends\PtBrValidator\Rules\Telefone::class,
-            'telefone_com_ddd'         => \LaravelLegends\PtBrValidator\Rules\TelefoneComDdd::class,
-            'telefone_com_codigo'      => \LaravelLegends\PtBrValidator\Rules\TelefoneComCodigo::class,
-            'formato_cep'              => \LaravelLegends\PtBrValidator\Rules\FormatoCep::class,
-            'formato_placa_de_veiculo' => \LaravelLegends\PtBrValidator\Rules\FormatoPlacaDeVeiculo::class,
-            'formato_pis'              => \LaravelLegends\PtBrValidator\Rules\FormatoPis::class,
-            'pis'                      => \LaravelLegends\PtBrValidator\Rules\Pis::class,
-        ];
-
+    /**
+     * @param array $rules
+     */
+    public function registerRules(array $rules)
+    {
         foreach ($rules as $name => $class) {
+            self::$rules[$name] = $class;
 
+            /**
+             * @var Rule $rule
+             */
             $rule = new $class;
 
-            $extension = static function ($attribute, $value) use($rule) {
+            $extension = static function ($attribute, $value) use ($rule) {
                 return $rule->passes($attribute, $value);
             };
 
             $this->app['validator']->extend($name, $extension, $rule->message());
         }
     }
-
 
     /**
      * Register the service provider.
@@ -62,7 +70,6 @@ class ValidatorProvider extends ServiceProvider
      */
     public function register()
     {
-
     }
 
     /**
@@ -74,5 +81,4 @@ class ValidatorProvider extends ServiceProvider
     {
         return [];
     }
-
 }
